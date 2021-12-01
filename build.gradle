@@ -1,0 +1,22 @@
+plugins {
+    id 'groovy'
+    id 'java'
+}
+
+group 'l.kratochvil'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation('org.codehaus.groovy:groovy-all:2.3.11')
+    implementation("com.google.guava:guava:30.0-jre")
+    implementation("commons-io:commons-io:2.11.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
