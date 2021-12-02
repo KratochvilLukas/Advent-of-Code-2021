@@ -33,7 +33,7 @@ class Day2 {
                 .map { new Input(it)  }.collect(Collectors.toList())
         inputs.forEach{
             if (it.direction == "forward") {
-                horizontal += it`.number
+                horizontal += it.number
                 depth += it.number * aim
             } else if (it.direction == "up") {
                 aim -= it.number
