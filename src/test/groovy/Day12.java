@@ -126,18 +126,11 @@ public class Day12 {
                     if (neighbor.big || notAlreadyVisited(neighbor)) {
                         Road neighborToEnd = new Road(neighbor, end, allRoad);
                         neighborToEnd.walk();
-                        if (neighborToEnd.reached) {
-                            this.possibleWays += neighborToEnd.possibleWays;
-                            this.reached = true;
-                        };
+                        this.possibleWays += neighborToEnd.possibleWays;
                     }
                 } else {
                     possibleWays++;
-                    allRoad.add(end);
-                    System.out.println(allRoad);
                     allRoad.remove(allRoad.size() - 1);
-                    allRoad.remove(allRoad.size() - 1);
-                    reached = true;
                 }
             }
         }
@@ -149,18 +142,11 @@ public class Day12 {
                     if (neighbor.big || notAlreadyVisitedOrNoSmallVisitedTwice(neighbor)) {
                         Road neighborToEnd = new Road(neighbor, end, allRoad);
                         neighborToEnd.walkImproved();
-                        if (neighborToEnd.reached) {
-                            this.possibleWays += neighborToEnd.possibleWays;
-                            this.reached = true;
-                        };
+                        this.possibleWays += neighborToEnd.possibleWays;
                     }
                 } else {
                     possibleWays++;
-                    allRoad.add(end);
-                    System.out.println(allRoad);
                     allRoad.remove(allRoad.size() - 1);
-                    allRoad.remove(allRoad.size() - 1);
-                    reached = true;
                 }
             }
         }
