@@ -71,12 +71,12 @@ public class Day13 {
 
         private void foldX(Fold fold) {
             int xLength = getGridLength(xMax, fold.index);
-            int[][] newGrid = new int[yMax + 1][xLength];
+            int[][] newGrid = new int[yMax + 1][xLength + 1];
             for (int y = 0; y <= yMax; y++) {
                 for (int x = 1; x <= xLength; x++) {
                     int leftPosition = fold.index - x;
                     if (leftPosition >= 0) {
-                        newGrid[y][xLength - x] = (grid[y][leftPosition] == 1 || grid[y][fold.index + x] == 1) ? 1 : 0;
+                        newGrid[y][xLength - x] = (grid[y][leftPosition] == 1 || (fold.index + x <= xMax && grid[y][fold.index + x] == 1)) ? 1 : 0;
                     } else {
                         newGrid[y][x] = grid[y][fold.index + x];
                     }
@@ -89,18 +89,15 @@ public class Day13 {
 
         private void foldY(Fold fold) {
             int yLength = getGridLength(yMax, fold.index);
-            int[][] newGrid = new int[yLength][xMax + 1];
+            int[][] newGrid = new int[yLength + 1][xMax + 1];
 
             for (int y = 1; y <= yLength; y++) {
                 for (int x = 0; x <= xMax; x++) {
-                    try {
-                        int upPosition = fold.index - y;
-                        if (upPosition >= 0) {
-                            newGrid[yLength - y][x] = (grid[upPosition][x] == 1 || grid[fold.index + y][x] == 1) ? 1 : 0;
-                        } else {
-                            newGrid[y][x] = grid[fold.index + y][x];
-                        }
-                    } catch (Throwable e) {
+                    int upPosition = fold.index - y;
+                    if (upPosition >= 0) {
+                        newGrid[yLength - y][x] = (grid[upPosition][x] == 1 || (fold.index + y <= yMax && grid[fold.index + y][x] == 1)) ? 1 : 0;
+                    } else {
+                        newGrid[y][x] = grid[fold.index + y][x];
                     }
                 }
             }
