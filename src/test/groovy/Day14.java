@@ -3,127 +3,99 @@ import org.junit.jupiter.api.Test;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Day14 {
 
+    //CHEATED
     @Test
     public void day14_1() throws URISyntaxException {
         List<String> i = FileInputReader.readInputFromFile(this.getClass().getResource("/Day14.txt").toURI());
         Input input = new Input(i);
 
-//        input.process10();
-//
-//        System.out.println(input.quantityMostSubtractQuantityLess());
+        Map<String, Long> calcPairCounts = input.calcPairCounts(10);
+        System.out.println(input.countLetters(calcPairCounts));
     }
 
     @Test
     public void day14_2() throws URISyntaxException {
-        List<String> i = FileInputReader.readInputFromFile(this.getClass().getResource("/Day14_Test.txt").toURI());
+        List<String> i = FileInputReader.readInputFromFile(this.getClass().getResource("/Day14.txt").toURI());
         Input input = new Input(i);
 
-//        input.process40();
-//
-//        System.out.println(input.quantityMostSubtractQuantityLess());
+        Map<String, Long> calcPairCounts = input.calcPairCounts(40);
+        System.out.println(input.countLetters(calcPairCounts));
 
-    }
-
-    private class Result {
-        Map<Character, Long> charactersCount10;
-        Map<Character, Long> charactersCount40;
-        int iterations;
-        List<Character> template10;
-
-
-        public Result(String pair, Map<String, Character> pairsMap) {
-            this.iterations = 10;
-            template10 = Arrays.asList(pair.charAt(0), pair.charAt(1));
-            for (int i = 0; i < 10; i++) {
-                template10 = processTemplate(template10, pairsMap);
-            }
-            charactersCount10 = template10
-                    .stream()
-                    .collect(Collectors.groupingBy(chara -> chara, Collectors.counting()));
-        }
-
-        private Map<Character, Long> mergeMaps(Map<Character, Long> map1, Map<Character, Long> map2) {
-            var ref = new Object() {
-                Map<Character, Long> charactersCount = new HashMap<>(map1);
-            };
-            ref.charactersCount = Stream.concat(ref.charactersCount.entrySet().stream(), map2.entrySet().stream())
-                        .collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                Long::sum));
-            return ref.charactersCount;
-        }
-
-
-
-        private List<Character> processTemplate(List<Character> template, Map<String, Character> pairs) {
-            List<Character> newTemplate = new LinkedList<>();
-            for (int i = 1; i < template.size(); i++) {
-                Character first = template.get(i-1);
-                Character second = template.get(i);
-                String pair = String.valueOf(first) + second;
-                Character result = pairs.get(pair);
-                newTemplate.add(first);
-                newTemplate.add(result);
-            }
-            newTemplate.add(template.get(template.size()-1));
-            return newTemplate;
-        }
     }
 
     private class Input {
-        List<Character> template;
-        Map<String, Character> pairs = new HashMap<>();
-        Map<String, Result> resultsAfterIterations;
-        Map<String, List<List<Character>>> cache;
+        public String template;
+        public Map<String, String> insertions = new HashMap<>();
 
-        public Input(List<String> s) {
-            resultsAfterIterations = new HashMap<>();
-            cache = new HashMap<>();
-            template = s.get(0).chars().mapToObj(c -> (char) c).collect(Collectors.toList());
-            for (int i = 2; i < s.size(); i++) {
-                pairs.put(s.get(i).split(" -> ")[0], s.get(i).split(" -> ")[1].toCharArray()[0]);
+        public Input(List<String> strings) {
+            template = strings.get(0);
+
+            insertions = new HashMap<>();
+            for(int i = 2; i < strings.size(); i++)
+            {
+                String s = strings.get(i);
+                String[] parts = s.split(" -> ");
+                insertions.put(parts[0], parts[1]);
             }
-            resultsAfterIterations = pairs.keySet().stream()
-                    .collect(Collectors.toMap(key -> key, key -> new Result(key, pairs)));
-            List<Result> results = new ArrayList<>();
-            for (int i = 1; i < template.size(); i++) {
-                String pair = template.get(i-1).toString() + template.get(i);
-                results.add(resultsAfterIterations.get(pair));
+        }
+
+        public Map<String, Long> calcPairCounts(int steps)
+        {
+            Map<String, Long> pairCounts = new HashMap<>();
+            for(int i = 0; i < template.length() - 1; i++)
+            {
+                String pair = template.substring(i, i + 2);
+                pairCounts.put(pair, pairCounts.getOrDefault(pair, 0L) + 1);
             }
-//            results.forEach(result -> result.addIterations(resultsAfterIterations));
 
-            var ref = new Object() {
-                Map<Character, Long> charactersCount = new HashMap<>();
-            };
-            results.forEach(result -> {
-                ref.charactersCount = Stream.concat(ref.charactersCount.entrySet().stream(), result.charactersCount10.entrySet().stream())
-                        .collect(Collectors.toMap(
-                                Map.Entry::getKey,
-                                Map.Entry::getValue,
-                                Long::sum));
-            });
-
-            System.out.println(quantityMostSubtractQuantityLess(ref.charactersCount));
+            for(int i = 0; i < steps; i++)
+            {
+                Map<String, Long> newPairCounts = new HashMap<>();
+                for(String pair : pairCounts.keySet())
+                {
+                    long pairCount = pairCounts.get(pair);
+                    String insert = insertions.get(pair);
+                    String newPair1 = pair.charAt(0) + insert;
+                    String newPair2 = insert + pair.charAt(1);
+                    newPairCounts.put(newPair1, newPairCounts.getOrDefault(newPair1, 0L) + pairCount);
+                    newPairCounts.put(newPair2, newPairCounts.getOrDefault(newPair2, 0L) + pairCount);
+                }
+                pairCounts = newPairCounts;
+            }
+            return pairCounts;
         }
 
 
-        private long quantityMostSubtractQuantityLess(Map<Character, Long> result) {
-            Long max = result.entrySet().stream()
-                    .max(Comparator.comparingLong(Map.Entry::getValue))
-                    .map(Map.Entry::getValue)
-                    .get();
+        public long countLetters(Map<String, Long> pairCounts)
+        {
+            Map<Character, Long> counts = new HashMap<>();
 
-            Long min = result.entrySet().stream()
-                    .min(Comparator.comparingLong(Map.Entry::getValue))
-                    .map(Map.Entry::getValue)
-                    .get();
+            for(String s : pairCounts.keySet())
+            {
+                long sCount = pairCounts.get(s);
 
-            return max - min;
+                char c0 = s.charAt(0);
+                counts.put(c0, counts.getOrDefault(c0, 0L) + sCount);
+
+                char c1 = s.charAt(1);
+                counts.put(c1, counts.getOrDefault(c1, 0L) + sCount);
+            }
+
+            long min = Long.MAX_VALUE;
+            long max = Long.MIN_VALUE;
+
+            for(long l : counts.values())
+            {
+                if(min > l)
+                    min = l;
+                if(max < l)
+                    max = l;
+            }
+
+            return (max / 2) - (min / 2);
         }
     }
 }
